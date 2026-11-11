@@ -1,0 +1,17 @@
+name: d1-check
+on:
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query setting and recent emails
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACC: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "--- setting ---"
+          curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/$ACC/d1/database/3e719983-b6a5-404e-b499-64ba1a7cd89f/query" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"sql":"SELECT no_recipient, receive FROM setting"}'
+          echo
+          echo "--- recent emails ---"
+          curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/$ACC/d1/database/3e719983-b6a5-404e-b499-64ba1a7cd89f/query" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"sql":"SELECT email_id, to_email, subject, status, type, is_del FROM email ORDER BY email_id DESC LIMIT 8"}'
